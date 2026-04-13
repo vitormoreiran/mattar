@@ -27,6 +27,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-1",
       type: "stage",
       number: "01",
+      session: "Abertura",
+      surface: "Texto",
       layout: "text",
       title: "Introdução",
       paragraphs: [
@@ -44,6 +46,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-2",
       type: "stage",
       number: "02",
+      session: "Abertura",
+      surface: "Texto",
       layout: "text",
       title: "Pensar o futuro",
       paragraphs: [
@@ -59,6 +63,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-3",
       type: "stage",
       number: "03",
+      session: "Conceito",
+      surface: "Texto",
       layout: "text",
       title: "Dicotomias e coexistência",
       summary:
@@ -78,6 +84,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-3-image",
       type: "stage",
       number: "03",
+      session: "Conceito",
+      surface: "Visual",
       layout: "media",
       title: "Campo visual",
       summary:
@@ -95,6 +103,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-4",
       type: "stage",
       number: "04",
+      session: "Conceito",
+      surface: "Texto",
       layout: "text",
       title: "Cone de Luz",
       summary:
@@ -118,6 +128,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-4-image",
       type: "stage",
       number: "04",
+      session: "Conceito",
+      surface: "Visual",
       layout: "media",
       title: "Imagem central",
       summary:
@@ -135,6 +147,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-5",
       type: "stage",
       number: "05",
+      session: "Conceito",
+      surface: "Texto",
       layout: "text",
       title: "Poíesis",
       summary:
@@ -162,6 +176,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-6",
       type: "stage",
       number: "06",
+      session: "Conceito",
+      surface: "Texto",
       layout: "text",
       title: "Casa expandida",
       summary:
@@ -179,6 +195,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-6-image",
       type: "stage",
       number: "06",
+      session: "Conceito",
+      surface: "Visual",
       layout: "media",
       title: "Casa expandida",
       summary:
@@ -196,6 +214,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-7",
       type: "stage",
       number: "07",
+      session: "Espaço",
+      surface: "Texto",
       layout: "text",
       title: "Espaço e performance",
       summary:
@@ -222,6 +242,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-7-image",
       type: "stage",
       number: "07",
+      session: "Espaço",
+      surface: "Visual",
       layout: "media",
       title: "Conversation Pit",
       summary:
@@ -239,6 +261,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-8",
       type: "stage",
       number: "08",
+      session: "Atos",
+      surface: "Texto",
       layout: "text",
       title: "1º ato - Utopia",
       summary:
@@ -264,6 +288,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-8-image",
       type: "stage",
       number: "08",
+      session: "Atos",
+      surface: "Visual",
       layout: "media",
       title: "Referências do ato",
       summary:
@@ -295,6 +321,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-9",
       type: "stage",
       number: "09",
+      session: "Atos",
+      surface: "Texto",
       layout: "text",
       title: "2º ato - Indivíduo",
       summary:
@@ -317,6 +345,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-9-image",
       type: "stage",
       number: "09",
+      session: "Atos",
+      surface: "Visual",
       layout: "media",
       title: "Referências do ato",
       summary:
@@ -348,6 +378,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-10",
       type: "stage",
       number: "10",
+      session: "Atos",
+      surface: "Mapa",
       layout: "index",
       title: "3º, 4º e 5º atos",
       blocks: [
@@ -371,6 +403,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-11",
       type: "stage",
       number: "11",
+      session: "Encerramento",
+      surface: "Síntese",
       layout: "quote",
       title: "Como termina",
       summary:
@@ -382,6 +416,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-12",
       type: "stage",
       number: "12",
+      session: "Pesquisa",
+      surface: "Texto",
       layout: "text",
       title: "Redes ontológicas",
       paragraphs: [
@@ -411,6 +447,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-13",
       type: "stage",
       number: "13",
+      session: "Pesquisa",
+      surface: "Texto",
       layout: "text",
       title: "Autopoiesis e pós-humano",
       blocks: [
@@ -437,6 +475,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-14",
       type: "stage",
       number: "14",
+      session: "Pesquisa",
+      surface: "Síntese",
       layout: "quote",
       title: "Utopia, memória e futuros possíveis",
       summary:
@@ -448,6 +488,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-15",
       type: "stage",
       number: "15",
+      session: "Pesquisa",
+      surface: "Texto",
       layout: "text",
       title: "Casas do futuro",
       paragraphs: [
@@ -475,6 +517,8 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-16",
       type: "stage",
       number: "16",
+      session: "Pesquisa",
+      surface: "Texto",
       layout: "text",
       title: "Sabedoria primordial",
       paragraphs: [

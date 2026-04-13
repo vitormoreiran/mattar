@@ -10,6 +10,7 @@
     stack: null,
     markers: [],
     stages: [],
+    navLinks: [],
     teardownStack: null,
   };
 
@@ -33,6 +34,40 @@
     return getStages().find((section) => section.id === id) || null;
   }
 
+  function getStageMeta(section, index, stages) {
+    const current = index + 1;
+    const total = stages.length;
+    const session = section.session || "Percurso";
+    const sessionStages = stages.filter((stage) => (stage.session || "Percurso") === session);
+    const sessionIndex = sessionStages.findIndex((stage) => stage.id === section.id) + 1;
+
+    return {
+      pageLabel: `${current.toString().padStart(2, "0")} / ${total.toString().padStart(2, "0")}`,
+      session,
+      sessionLabel: `Sessão ${session}`,
+      sessionPageLabel: `${sessionIndex.toString().padStart(2, "0")} / ${sessionStages.length
+        .toString()
+        .padStart(2, "0")}`,
+      surface: section.surface || "Texto",
+    };
+  }
+
+  function getActiveNavId(stage) {
+    if (!stage) return null;
+
+    let activeNavId = page.nav[0]?.id || null;
+    page.nav.forEach((item) => {
+      const target = getStageById(item.id);
+      if (!target) return;
+
+      if (parseInt(target.number, 10) <= parseInt(stage.number, 10)) {
+        activeNavId = item.id;
+      }
+    });
+
+    return activeNavId;
+  }
+
   function renderTopbar() {
     const header = createEl("header", "topbar");
     const inner = createEl("div", "topbar__inner");
@@ -45,10 +80,13 @@
     brand.appendChild(createText("h1", "topbar__title", page.title));
 
     const nav = createEl("nav", "topbar__nav");
+    refs.navLinks = [];
     page.nav.forEach((item) => {
       const link = createText("a", "nav-link", item.label);
       link.href = `#${item.id}`;
+      link.dataset.navId = item.id;
       nav.appendChild(link);
+      refs.navLinks.push(link);
     });
 
     inner.appendChild(brand);
@@ -82,7 +120,7 @@
     return wrap;
   }
 
-  function renderStage(section) {
+  function renderStage(section, meta) {
     const wrap = createEl("article", "stage");
     wrap.dataset.stageId = section.id;
 
@@ -93,6 +131,12 @@
     const previewBlockCount = section.previewBlocks || 1;
     const cardClass = `stage__card stage__card--preview stage__card--${layout}`;
     const card = createEl("div", cardClass);
+    const metaBar = createEl("div", "stage__meta");
+    metaBar.appendChild(createText("span", "stage__meta-pill", meta.sessionLabel));
+    metaBar.appendChild(createText("span", "stage__meta-pill", meta.surface));
+    metaBar.appendChild(createText("span", "stage__meta-text", `Página ${meta.pageLabel}`));
+    metaBar.appendChild(createText("span", "stage__meta-text", `Sessão ${meta.sessionPageLabel}`));
+
     const top = createEl("div", "stage__top");
     top.appendChild(createText("div", "stage__number", section.number));
 
@@ -199,6 +243,7 @@
       outcome.appendChild(createText("p", "stage__outcome-text", section.outcome));
     }
 
+    card.appendChild(metaBar);
     card.appendChild(top);
     if (points.childNodes.length) card.appendChild(points);
     if (body.childNodes.length) card.appendChild(body);
@@ -228,7 +273,7 @@
       markers.appendChild(marker);
       refs.markers.push(marker);
 
-      const stage = renderStage(section);
+      const stage = renderStage(section, getStageMeta(section, index, sections));
       layers.appendChild(stage);
       refs.stages.push(stage);
     });
@@ -243,12 +288,19 @@
   function setActiveStage(index) {
     const clamped = Math.max(0, Math.min(refs.stages.length - 1, index));
     state.activeStageIndex = clamped;
+    const stages = getStages();
+    const activeStage = stages[clamped];
+    const activeNavId = getActiveNavId(activeStage);
 
     refs.stages.forEach((stage, stageIndex) => {
       const isActive = stageIndex === clamped;
       stage.classList.toggle("is-active", isActive);
       stage.classList.toggle("is-before", stageIndex < clamped);
       stage.classList.toggle("is-after", stageIndex > clamped);
+    });
+
+    refs.navLinks.forEach((link) => {
+      link.classList.toggle("is-active", link.dataset.navId === activeNavId);
     });
   }
 
