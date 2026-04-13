@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mesa Electrolux · DLA Stack</title>
+    <link rel="stylesheet" href="./mesa-stack.css" />
+  </head>
+  <body>
+    <div class="workspace">
+      <aside class="sidebar">
+        <p class="eyebrow">Mesa 3 / estudo local</p>
+        <h1 class="title">Stack de niveis e particulas</h1>
+        <p class="intro">
+          Prototipo espacial para a mesa mapeada. Os vetores locais sao empilhados como niveis reais, e o comportamento das particulas responde as mascaras, mesas e pratos fixos.
+        </p>
+
+        <section class="panel">
+          <div class="panel__head">
+            <span class="panel__kicker">Atos</span>
+            <span class="panel__meta">cor + comportamento</span>
+          </div>
+          <div id="act-list" class="act-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head">
+            <span class="panel__kicker">Mesa simulada</span>
+            <span class="panel__meta">5 mesas / 6 pratos fixos</span>
+          </div>
+
+          <label class="control">
+            <span>Pratos ativos por mesa</span>
+            <input id="occupancy" type="range" min="0" max="6" value="4" />
+            <strong id="occupancy-value">4</strong>
+          </label>
+
+          <label class="control">
+            <span>Estabilidade</span>
+            <input id="stability" type="range" min="0" max="100" value="68" />
+            <strong id="stability-value">68</strong>
+          </label>
+
+          <label class="control">
+            <span>Troca</span>
+            <input id="exchange" type="range" min="0" max="100" value="24" />
+            <strong id="exchange-value">24</strong>
+          </label>
+
+          <label class="toggle">
+            <input id="show-vectors" type="checkbox" checked />
+            <span>Mostrar stack vetorial</span>
+          </label>
+        </section>
+
+        <section class="panel panel--readout">
+          <div class="readout">
+            <span class="readout__label">Aplicacao</span>
+            <p id="act-application" class="readout__text"></p>
+          </div>
+
+          <div class="readout">
+            <span class="readout__label">Paleta</span>
+            <div id="palette" class="palette"></div>
+          </div>
+
+          <div class="readout">
+            <span class="readout__label">Sistema</span>
+            <ul class="facts">
+              <li><strong id="fact-mesas">5</strong> mesas detectadas no vetor</li>
+              <li><strong id="fact-pratos">30</strong> pratos fixos no desenho</li>
+              <li><strong id="fact-levels">4</strong> niveis principais usados no stack</li>
+            </ul>
+          </div>
+        </section>
+      </aside>
+
+      <main class="stage">
+        <div class="stage__topbar">
+          <div class="badge">
+            <span class="badge__label">Ato</span>
+            <strong id="hud-name" class="badge__value"></strong>
+          </div>
+          <div class="badge">
+            <span class="badge__label">Statement</span>
+            <p id="hud-statement" class="badge__text"></p>
+          </div>
+        </div>
+
+        <div class="scene-wrap">
+          <div id="artboard" class="artboard">
+            <canvas id="scene" class="artboard__canvas"></canvas>
+            <div id="vector-stack" class="artboard__stack"></div>
+          </div>
+        </div>
+
+        <div class="stage__footer">
+          <div class="meter">
+            <span class="meter__label">Mesas ativas</span>
+            <strong id="hud-mesas" class="meter__value"></strong>
+          </div>
+          <div class="meter">
+            <span class="meter__label">Pratos ativos</span>
+            <strong id="hud-pratos" class="meter__value"></strong>
+          </div>
+          <div class="meter">
+            <span class="meter__label">Nos</span>
+            <strong id="hud-nodes" class="meter__value"></strong>
+          </div>
+          <div class="meter">
+            <span class="meter__label">Regime</span>
+            <strong id="hud-regime" class="meter__value"></strong>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="./content/mesa-acts.js"></script>
+    <script src="./content/mesa-vectors.js"></script>
+    <script src="./mesa-stack.js"></script>
+  </body>
+</html>

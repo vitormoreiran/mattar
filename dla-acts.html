@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DLA Acts Lab</title>
+    <link rel="stylesheet" href="./dla-acts.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="panel">
+        <p class="eyebrow">Sala viva / estudo local</p>
+        <h1 class="title">Atos em agregacao</h1>
+        <p class="intro">
+          Visualizador local para testar variaveis de DLA por ato, paleta e aplicacao cenica. Os presets vivem em arquivo local e podem virar base para TouchDesigner.
+        </p>
+
+        <section class="act-chooser">
+          <div class="section-head">
+            <span class="section-kicker">Atos</span>
+            <span class="section-note">presets locais</span>
+          </div>
+          <div id="act-list" class="act-list"></div>
+        </section>
+
+        <section class="controls">
+          <div class="section-head">
+            <span class="section-kicker">Mesa simulada</span>
+            <span class="section-note">0 a 6 pratos</span>
+          </div>
+
+          <label class="control">
+            <span>Pratos por mesa</span>
+            <input id="plates" type="range" min="0" max="6" value="3" />
+            <strong id="plates-value">3</strong>
+          </label>
+
+          <label class="control">
+            <span>Estabilidade</span>
+            <input id="stability" type="range" min="0" max="100" value="62" />
+            <strong id="stability-value">62</strong>
+          </label>
+
+          <label class="control">
+            <span>Troca</span>
+            <input id="exchange" type="range" min="0" max="100" value="28" />
+            <strong id="exchange-value">28</strong>
+          </label>
+
+          <label class="toggle">
+            <input id="echo" type="checkbox" checked />
+            <span>Eco entre mesas e conexoes tardias</span>
+          </label>
+        </section>
+
+        <section class="readout">
+          <div class="readout-card">
+            <span class="readout-label">Aplicacao</span>
+            <p id="act-application" class="readout-text"></p>
+          </div>
+
+          <div class="readout-card">
+            <span class="readout-label">Paleta</span>
+            <div id="palette" class="palette"></div>
+          </div>
+
+          <div class="readout-card">
+            <span class="readout-label">Variaveis</span>
+            <ul id="notes" class="notes"></ul>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <span>Arquivos locais:</span>
+          <code>site/content/dla-acts.js</code>
+          <code>site/dla-acts.js</code>
+        </footer>
+      </aside>
+
+      <main class="stage">
+        <canvas id="scene"></canvas>
+
+        <div class="stage-hud">
+          <div class="hud-card">
+            <span class="hud-kicker">Ato ativo</span>
+            <strong id="hud-name" class="hud-name"></strong>
+            <p id="hud-statement" class="hud-text"></p>
+          </div>
+
+          <div class="hud-grid">
+            <div class="hud-pill">
+              <span>Sementes</span>
+              <strong id="hud-seeds"></strong>
+            </div>
+            <div class="hud-pill">
+              <span>Walkers</span>
+              <strong id="hud-walkers"></strong>
+            </div>
+            <div class="hud-pill">
+              <span>Adesao</span>
+              <strong id="hud-sticky"></strong>
+            </div>
+            <div class="hud-pill">
+              <span>Nos</span>
+              <strong id="hud-nodes"></strong>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="./content/dla-acts.js"></script>
+    <script src="./dla-acts.js"></script>
+  </body>
+</html>
