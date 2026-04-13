@@ -4,14 +4,12 @@
 
   const state = {
     activeStageIndex: 0,
-    fullscreenStageId: null,
   };
 
   const refs = {
     stack: null,
     markers: [],
     stages: [],
-    overlayRoot: null,
     teardownStack: null,
   };
 
@@ -84,37 +82,26 @@
     return wrap;
   }
 
-  function renderStage(section, options) {
-    const settings = options || {};
-    const wrap = createEl("article", settings.fullscreen ? "stage stage--fullscreen" : "stage");
+  function renderStage(section) {
+    const wrap = createEl("article", "stage");
     wrap.dataset.stageId = section.id;
 
     const layout = section.layout || "text";
-    const cardClass = settings.fullscreen
-      ? `stage__card stage__card--fullscreen stage__card--${layout}`
-      : `stage__card stage__card--${layout}`;
+    const isPreview = true;
+    const previewParagraphCount =
+      section.previewParagraphs || (layout === "text" ? 2 : layout === "quote" ? 0 : 1);
+    const previewBlockCount = section.previewBlocks || 1;
+    const cardClass = `stage__card stage__card--preview stage__card--${layout}`;
     const card = createEl("div", cardClass);
     const top = createEl("div", "stage__top");
     top.appendChild(createText("div", "stage__number", section.number));
 
     const head = createEl("div", "stage__head");
     head.appendChild(createText("h2", "stage__title", section.title));
-    head.appendChild(createText("p", "stage__summary", section.summary));
-    top.appendChild(head);
-
-    const controls = createEl("div", "stage__controls");
-    if (settings.fullscreen) {
-      const back = createText("button", "stage__button stage__button--back", "Voltar");
-      back.type = "button";
-      back.addEventListener("click", closeFullscreen);
-      controls.appendChild(back);
-    } else {
-      const expand = createText("button", "stage__button", "Expandir");
-      expand.type = "button";
-      expand.dataset.stageExpand = section.id;
-      controls.appendChild(expand);
+    if (section.summary) {
+      head.appendChild(createText("p", "stage__summary", section.summary));
     }
-    top.appendChild(controls);
+    top.appendChild(head);
 
     const points = createEl("ul", "stage__points");
     if (section.points && section.points.length) {
@@ -129,7 +116,9 @@
 
     if (section.paragraphs && section.paragraphs.length) {
       const prose = createEl("div", "stage__prose");
-      section.paragraphs.forEach((paragraph) => {
+      const paragraphs = section.paragraphs.slice(0, previewParagraphCount);
+
+      paragraphs.forEach((paragraph) => {
         prose.appendChild(createText("p", "stage__paragraph", paragraph));
       });
       body.appendChild(prose);
@@ -137,7 +126,9 @@
 
     if (section.blocks && section.blocks.length) {
       const blocks = createEl("div", "stage__blocks");
-      section.blocks.forEach((block) => {
+      const stageBlocks = section.blocks.slice(0, previewBlockCount);
+
+      stageBlocks.forEach((block) => {
         const item = createEl("section", "stage__block");
         if (block.label) item.appendChild(createText("span", "stage__block-label", block.label));
         if (block.title) item.appendChild(createText("h3", "stage__block-title", block.title));
@@ -161,11 +152,40 @@
       if (section.media.label) media.appendChild(createText("span", "stage__media-label", section.media.label));
       if (section.media.title) media.appendChild(createText("h3", "stage__media-title", section.media.title));
       if (section.media.caption) media.appendChild(createText("p", "stage__media-caption", section.media.caption));
+
+      if (section.media.src) {
+        const figure = createEl("figure", "stage__media-figure");
+        const image = createEl("img", "stage__media-image");
+        image.src = section.media.src;
+        image.alt = section.media.alt || section.media.title || section.title;
+        image.loading = "lazy";
+        figure.appendChild(image);
+        media.appendChild(figure);
+      }
+
       if (section.media.items && section.media.items.length) {
         const mediaGrid = createEl("div", "stage__media-grid");
-        section.media.items.forEach((item) => {
-          const tile = createEl("div", "stage__media-tile");
-          tile.appendChild(createText("span", "stage__media-tile-text", item));
+        const mediaItems = section.media.items.slice(0, 3);
+
+        mediaItems.forEach((item) => {
+          const tile = createEl("figure", "stage__media-tile");
+
+          if (typeof item === "string") {
+            tile.appendChild(createText("span", "stage__media-tile-text", item));
+          } else {
+            const image = createEl("img", "stage__media-image");
+            image.src = item.src;
+            image.alt = item.alt || item.title || section.title;
+            image.loading = "lazy";
+            tile.appendChild(image);
+
+            if (item.title) {
+              const caption = createEl("figcaption", "stage__media-tile-text");
+              caption.textContent = item.title;
+              tile.appendChild(caption);
+            }
+          }
+
           mediaGrid.appendChild(tile);
         });
         media.appendChild(mediaGrid);
@@ -229,10 +249,6 @@
       stage.classList.toggle("is-active", isActive);
       stage.classList.toggle("is-before", stageIndex < clamped);
       stage.classList.toggle("is-after", stageIndex > clamped);
-
-      stage.querySelectorAll("[data-stage-expand]").forEach((button) => {
-        button.disabled = !isActive;
-      });
     });
   }
 
@@ -260,53 +276,14 @@
       }
     }
 
-    refs.stack.addEventListener("click", onStackClick);
     window.addEventListener("scroll", requestUpdate, { passive: true });
     window.addEventListener("resize", requestUpdate);
     requestUpdate();
 
     refs.teardownStack = function () {
-      refs.stack.removeEventListener("click", onStackClick);
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
     };
-  }
-
-  function onStackClick(event) {
-    const button = event.target.closest("[data-stage-expand]");
-    if (!button || button.disabled) return;
-    openFullscreen(button.dataset.stageExpand);
-  }
-
-  function renderFullscreenOverlay(stage) {
-    const overlay = createEl("div", "stage-fullscreen");
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.appendChild(renderStage(stage, { fullscreen: true }));
-    return overlay;
-  }
-
-  function openFullscreen(stageId) {
-    state.fullscreenStageId = stageId;
-    document.body.style.overflow = "hidden";
-    updateFullscreen();
-  }
-
-  function closeFullscreen() {
-    state.fullscreenStageId = null;
-    document.body.style.overflow = "";
-    updateFullscreen();
-  }
-
-  function updateFullscreen() {
-    if (!refs.overlayRoot) return;
-    refs.overlayRoot.innerHTML = "";
-
-    if (!state.fullscreenStageId) return;
-    const stage = getStageById(state.fullscreenStageId);
-    if (!stage) return;
-
-    refs.overlayRoot.appendChild(renderFullscreenOverlay(stage));
   }
 
   function renderPage() {
@@ -317,7 +294,6 @@
       refs.teardownStack = null;
     }
 
-    document.body.style.overflow = state.fullscreenStageId ? "hidden" : "";
     refs.stack = null;
     refs.markers = [];
     refs.stages = [];
@@ -336,11 +312,7 @@
     frame.appendChild(content);
     app.appendChild(frame);
 
-    refs.overlayRoot = createEl("div", "overlay-root");
-    app.appendChild(refs.overlayRoot);
-
     setupStageStack();
-    updateFullscreen();
   }
 
   renderPage();

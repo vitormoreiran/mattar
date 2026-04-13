@@ -59,8 +59,11 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-3",
       type: "stage",
       number: "03",
-      layout: "text-image",
+      layout: "text",
       title: "Dicotomias e coexistência",
+      summary:
+        "Natural e artificial deixam de operar como polos opostos e passam a compor um mesmo campo relacional.",
+      previewParagraphs: 1,
       paragraphs: [
         "Desta forma, pensando na sustentabilidade como um grande desafio para as próximas gerações, seria algo natural imaginar o futuro em relação às questões que desafiam nossa existência.",
         "A partir de uma ampla pesquisa, pensou-se que há uma imensa dicotomia em relação às noções de natural e artificial, homem máquina etc e é nessa ambiguidade que está o coração deste projeto. Nele há um deslocamento fundamental: o homem não está separado da natureza, ele está inscrito nela. O artificial não se opõe ao natural; ele emerge como um desdobramento da própria vida.",
@@ -68,21 +71,35 @@ window.LAB_MATTAR_PAGE = {
         "O futuro deixa de ser imaginado como forma pronta a ser alcançada. Ele aparece como pré-individual: um reservatório de potenciais ainda não atualizados. Pensar o tempo como contínuo significa compreender que passado, presente e futuro não estão separados, mas operam em camadas de informação, tensão e emergência.",
         "Imaginar futuros através da coexistência é deslocar o olhar das separações para um continuum entre matéria, vida e técnica. Ao observar padrões que atravessam do mineral aos sistemas vivos e informacionais, reconhece-se uma lógica relacional comum, onde formas emergem sem controle central.",
       ],
-      media: {
-        type: "image",
-        label: "Campo visual",
-        title: "Matéria, vida e técnica",
-        caption: "Imagem abstrata, luz, textura ou composição que traduza continuidade, tensão e emergência.",
-      },
       outcome:
         "A proposta desloca o olhar das oposições fixas para uma lógica relacional entre matéria, vida e técnica.",
+    },
+    {
+      id: "slide-3-image",
+      type: "stage",
+      number: "03",
+      layout: "media",
+      title: "Campo visual",
+      summary:
+        "Slide de referência visual para a atmosfera espacial e cromática do projeto.",
+      media: {
+        type: "image",
+        label: "Referência",
+        title: "Matéria, vida e técnica",
+        caption: "Imagem isolada para leitura visual, sem interferir na composição tipográfica.",
+        src: "./assets/electcenografia/sala-amarela.jpg",
+        alt: "Ambiente amarelo orgânico com mobiliário curvo e jardim interno.",
+      },
     },
     {
       id: "slide-4",
       type: "stage",
       number: "04",
-      layout: "text-image",
+      layout: "text",
       title: "Cone de Luz",
+      summary:
+        "O Cone de Luz aparece como imagem central da apresentação, articulando passado, presente e futuro no mesmo campo visual.",
+      previewParagraphs: 1,
       paragraphs: [
         "Ao amanhecer, o raio de Sol não só se espalha sobre a terra, mas para o matemático Minkowski, sua luz irradia transversalmente pelo tempo.",
         "Ela irrompe a noite de ontem e cruza o dia de amanhã, alcançando o pôr do Sol de dois dias consecutivos.",
@@ -94,14 +111,25 @@ window.LAB_MATTAR_PAGE = {
         "O presente irradia ao futuro, em uma expansão constante do campo de encontros possíveis.",
         "Este ano é o vértice de uma confluência temporal. 2026 é o ponto de simetria entre centenários.",
       ],
-      media: {
-        type: "video",
-        label: "Player de vídeo",
-        title: "Cone de Luz",
-        caption: "Vídeo ou diagrama animado sobre luz, tempo e irradiação transversal.",
-      },
       outcome:
         "O Cone de Luz organiza a imagem central do projeto: passado e futuro coexistindo como força viva no presente.",
+    },
+    {
+      id: "slide-4-image",
+      type: "stage",
+      number: "04",
+      layout: "media",
+      title: "Imagem central",
+      summary:
+        "Área específica para diagrama, vídeo ou imagem de apoio ao Cone de Luz.",
+      media: {
+        type: "image",
+        label: "Referência",
+        title: "Cone de Luz",
+        caption: "Slide independente para diagramação visual do conceito central.",
+        src: "./assets/electcenografia/conversation-pit.jpg",
+        alt: "Ambiente circular verde com cortinas translúcidas e mesa central.",
+      },
     },
     {
       id: "slide-5",
@@ -109,6 +137,10 @@ window.LAB_MATTAR_PAGE = {
       number: "05",
       layout: "text",
       title: "Poíesis",
+      summary:
+        "Poíesis nomeia o gesto de criação que transforma memória, tecnologia e cotidiano em experiência sensível.",
+      previewParagraphs: 2,
+      previewBlocks: 1,
       paragraphs: [
         "Poíesis é um termo grego que significa criação, refere-se ao processo de trazer algo à existência que antes não existia.",
         "O projeto POÉSIS é a materialização desse movimento: não apenas uma celebração dos 100 anos da Electrolux no Brasil, mas um ato de criação que torna sensível uma história construída no cotidiano das casas e das vidas que elas abrigam.",
@@ -130,28 +162,48 @@ window.LAB_MATTAR_PAGE = {
       id: "slide-6",
       type: "stage",
       number: "06",
-      layout: "text-image",
+      layout: "text",
       title: "Casa expandida",
+      summary:
+        "A casa surge como organismo híbrido, sensível e coletivo, onde matéria, tecnologia e vida se prolongam mutuamente.",
+      previewParagraphs: 1,
       paragraphs: [
         "Aqui, a casa se revela como um corpo expandido e como expressão de uma inteligência coletiva: um organismo híbrido onde matéria, tecnologia e vida se articulam, prolongando o corpo para além de seus limites biológicos. A casa se torna um sistema vivo, que sente, organiza e devolve experiências.",
         "Cada pessoa carrega em si a memória de uma casa: gestos repetidos, saberes transmitidos, ritmos herdados, futuros imaginados.",
         "Assim, POESIS não representa uma história passada, mas a projeção de futuros imaginados que se atualizam continuamente em cada presente.",
       ],
-      media: {
-        type: "image",
-        label: "Imagem sugerida",
-        title: "Casa expandida",
-        caption: "Interior, objeto, diagrama espacial ou composição visual da casa como organismo híbrido.",
-      },
       outcome:
         "A casa aparece como organismo híbrido, memória sensível e infraestrutura viva de futuros possíveis.",
+    },
+    {
+      id: "slide-6-image",
+      type: "stage",
+      number: "06",
+      layout: "media",
+      title: "Casa expandida",
+      summary:
+        "Pausa visual dedicada à espacialidade e à presença sensorial da casa como organismo.",
+      media: {
+        type: "image",
+        label: "Referência",
+        title: "Casa expandida",
+        caption: "Imagem isolada para apoiar a construção atmosférica da apresentação.",
+        src: "./assets/electcenografia/mesa-verde.jpg",
+        alt: "Sala verde com assento circular e espelho d'água ao centro.",
+      },
     },
     {
       id: "slide-7",
       type: "stage",
       number: "07",
-      layout: "index",
+      layout: "text",
       title: "Espaço e performance",
+      summary:
+        "A experiência se organiza como percurso espacial de entrada, ativação e desdobramento performático.",
+      previewBlocks: 2,
+      paragraphs: [
+        "O espaço-base opera como dispositivo de imersão. A lógica do conversation pit organiza acolhimento, foco e circulação em uma única cena contínua.",
+      ],
       blocks: [
         {
           label: "1. O espaço",
@@ -167,11 +219,31 @@ window.LAB_MATTAR_PAGE = {
         "A experiência se organiza como percurso espacial e performático antes de se desdobrar nos atos.",
     },
     {
+      id: "slide-7-image",
+      type: "stage",
+      number: "07",
+      layout: "media",
+      title: "Conversation Pit",
+      summary:
+        "Slide dedicado ao conceito espacial base da apresentação e da performance.",
+      media: {
+        type: "image",
+        label: "Referência",
+        title: "Conversation Pit",
+        caption: "Imagem-guia para a construção espacial do ambiente principal.",
+        src: "./assets/electcenografia/conversation-pit.jpg",
+        alt: "Ambiente verde circular com cortinas e grande abertura central.",
+      },
+    },
+    {
       id: "slide-8",
       type: "stage",
       number: "08",
-      layout: "gallery",
+      layout: "text",
       title: "1º ato - Utopia",
+      summary:
+        "O primeiro ato abre o sistema com imagens de desejo, esperança e futuros possíveis.",
+      previewParagraphs: 1,
       paragraphs: [
         "A utopia não é um luxo da imaginação, mas uma função biológica de sobrevivência. Cultivar a esperança agora não é ingenuidade; é a tecnologia mais sofisticada que temos para promover futuros possíveis.",
         "É comum dizer que há o mundo utópico, e logo há o mundo real. Mas não há uma linha que os divide.",
@@ -185,21 +257,49 @@ window.LAB_MATTAR_PAGE = {
           items: ["Imagens de referência", "Comidas"],
         },
       ],
+      outcome:
+        "O primeiro ato abre a apresentação afirmando a imaginação como função vital e orientadora do porvir.",
+    },
+    {
+      id: "slide-8-image",
+      type: "stage",
+      number: "08",
+      layout: "media",
+      title: "Referências do ato",
+      summary:
+        "Página visual para atmosferas de utopia, cor e desejo.",
       media: {
         type: "gallery",
         label: "Galeria",
-        title: "Referências do ato",
-        items: ["Imagem de referência 01", "Imagem de referência 02", "Comida 01", "Comida 02"],
+        title: "Utopia",
+        items: [
+          {
+            src: "./assets/electcenografia/sala-amarela.jpg",
+            title: "Campo de cor",
+            alt: "Ambiente amarelo orgânico com mobiliário curvo.",
+          },
+          {
+            src: "./assets/electcenografia/conversation-pit.jpg",
+            title: "Centro de encontro",
+            alt: "Ambiente circular verde com cortinas translúcidas.",
+          },
+          {
+            src: "./assets/electcenografia/mesa-verde.jpg",
+            title: "Natureza integrada",
+            alt: "Sala verde com assento circular e água ao centro.",
+          },
+        ],
       },
-      outcome:
-        "O primeiro ato abre a apresentação afirmando a imaginação como função vital e orientadora do porvir.",
     },
     {
       id: "slide-9",
       type: "stage",
       number: "09",
-      layout: "gallery",
+      layout: "text",
       title: "2º ato - Indivíduo",
+      summary:
+        "O indivíduo aparece menos como forma fixa e mais como relação em transformação constante.",
+      previewParagraphs: 1,
       paragraphs: [
         "In dividuus, não divisível. Nesse contexto, criar deixa de ser impor forma e passa a ser ativar relações, e o humano passa a operar como meio dentro de processos de co-individuação.",
         "Projeta-se, assim, um sistema capaz de sustentar suas tensões em metaestabilidade, onde persistir é continuar a se transformar.",
@@ -210,14 +310,39 @@ window.LAB_MATTAR_PAGE = {
           items: ["Imagens de referência", "Comidas"],
         },
       ],
+      outcome:
+        "O indivíduo deixa de ser forma fixa e passa a ser relação em transformação contínua.",
+    },
+    {
+      id: "slide-9-image",
+      type: "stage",
+      number: "09",
+      layout: "media",
+      title: "Referências do ato",
+      summary:
+        "Página visual para curvas, presença e metaestabilidade.",
       media: {
         type: "gallery",
         label: "Galeria",
-        title: "Referências do ato",
-        items: ["Imagem de referência 01", "Imagem de referência 02", "Comida 01", "Comida 02"],
+        title: "Indivíduo",
+        items: [
+          {
+            src: "./assets/electcenografia/mesa-verde.jpg",
+            title: "Metaestabilidade",
+            alt: "Sala verde circular com água no centro.",
+          },
+          {
+            src: "./assets/electcenografia/sala-amarela.jpg",
+            title: "Curva e presença",
+            alt: "Ambiente amarelo orgânico com mobiliário de curvas amplas.",
+          },
+          {
+            src: "./assets/electcenografia/conversation-pit.jpg",
+            title: "Coindividuação",
+            alt: "Ambiente verde com espaço circular de convivência.",
+          },
+        ],
       },
-      outcome:
-        "O indivíduo deixa de ser forma fixa e passa a ser relação em transformação contínua.",
     },
     {
       id: "slide-10",

@@ -29,3 +29,4 @@ This folder contains the first navigable prototype for the Lab Mattar presentati
 - It validates the interface foundation, editorial block system, and integrated navigation.
 - `dla-acts.html` is a standalone local study for DLA-based act visualization with local presets and palette mapping.
 - `mesa-stack.html` is a mesa-specific study that stacks the local SVG levels and constrains particles by the real vector layers and fixed plate anchors.
+- `mesa-stack.html` is the main current entry point for the Electrolux mesa prototype.

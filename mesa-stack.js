@@ -6,13 +6,13 @@
   const ARTBOARD = vectorData.artboard;
   const BALANCED_PLATE_ORDER = [0, 3, 1, 4, 2, 5];
   const STACK_LAYERS = [
-    { key: "base", y: 0, scale: 1, opacity: 0.86 },
-    { key: "level1", y: -12, scale: 0.996, opacity: 0.58 },
-    { key: "level2", y: -24, scale: 0.992, opacity: 0.5 },
-    { key: "level3", y: -38, scale: 0.988, opacity: 0.44 },
-    { key: "mesas", y: -52, scale: 0.985, opacity: 0.28 },
-    { key: "plates", y: -60, scale: 0.982, opacity: 0.36 },
-    { key: "topCrop", y: -76, scale: 0.975, opacity: 0.16 },
+    { key: "base", target: "under", y: 0, scale: 1, opacity: 0.74 },
+    { key: "level1", target: "under", y: -10, scale: 0.996, opacity: 0.5 },
+    { key: "level2", target: "under", y: -22, scale: 0.992, opacity: 0.42 },
+    { key: "level3", target: "under", y: -34, scale: 0.988, opacity: 0.34 },
+    { key: "topCrop", target: "under", y: -72, scale: 0.976, opacity: 0.26 },
+    { key: "mesas", target: "over", y: -48, scale: 0.985, opacity: 0.3 },
+    { key: "plates", target: "over", y: -58, scale: 0.982, opacity: 0.56 },
   ];
 
   const refs = {
@@ -23,21 +23,26 @@
     stabilityValue: document.getElementById("stability-value"),
     exchange: document.getElementById("exchange"),
     exchangeValue: document.getElementById("exchange-value"),
+    density: document.getElementById("density"),
+    densityValue: document.getElementById("density-value"),
+    tempo: document.getElementById("tempo"),
+    tempoValue: document.getElementById("tempo-value"),
     showVectors: document.getElementById("show-vectors"),
+    resetScene: document.getElementById("reset-scene"),
     application: document.getElementById("act-application"),
     palette: document.getElementById("palette"),
     hudName: document.getElementById("hud-name"),
     hudStatement: document.getElementById("hud-statement"),
     hudMesas: document.getElementById("hud-mesas"),
     hudPratos: document.getElementById("hud-pratos"),
+    hudWalkers: document.getElementById("hud-walkers"),
     hudNodes: document.getElementById("hud-nodes"),
     hudRegime: document.getElementById("hud-regime"),
-    factMesas: document.getElementById("fact-mesas"),
-    factPratos: document.getElementById("fact-pratos"),
     factLevels: document.getElementById("fact-levels"),
     canvas: document.getElementById("scene"),
     artboard: document.getElementById("artboard"),
-    stack: document.getElementById("vector-stack"),
+    stackUnder: document.getElementById("vector-stack-under"),
+    stackOver: document.getElementById("vector-stack-over"),
   };
 
   const ctx = refs.canvas.getContext("2d");
@@ -46,6 +51,8 @@
     occupancy: Number(refs.occupancy.value),
     stability: Number(refs.stability.value),
     exchange: Number(refs.exchange.value),
+    density: Number(refs.density.value),
+    tempo: Number(refs.tempo.value),
     showVectors: refs.showVectors.checked,
     dpr: Math.min(window.devicePixelRatio || 1, 2),
     phase: 0,
@@ -57,13 +64,10 @@
   init();
 
   function init() {
-    refs.factMesas.textContent = String(vectorData.mesaCenters.length);
-    refs.factPratos.textContent = String(vectorData.plateAnchors.length);
     refs.factLevels.textContent = "4";
     buildMasks();
     renderActButtons();
     bindControls();
-    renderStack();
     handleResize();
     rebuildSimulation();
     window.addEventListener("resize", handleResize);
@@ -71,27 +75,27 @@
   }
 
   function bindControls() {
-    refs.occupancy.addEventListener("input", function () {
-      state.occupancy = Number(refs.occupancy.value);
-      refs.occupancyValue.textContent = String(state.occupancy);
-      rebuildSimulation();
-    });
-
-    refs.stability.addEventListener("input", function () {
-      state.stability = Number(refs.stability.value);
-      refs.stabilityValue.textContent = String(state.stability);
-      rebuildSimulation();
-    });
-
-    refs.exchange.addEventListener("input", function () {
-      state.exchange = Number(refs.exchange.value);
-      refs.exchangeValue.textContent = String(state.exchange);
-      rebuildSimulation();
-    });
+    bindSlider(refs.occupancy, refs.occupancyValue, "occupancy");
+    bindSlider(refs.stability, refs.stabilityValue, "stability");
+    bindSlider(refs.exchange, refs.exchangeValue, "exchange");
+    bindSlider(refs.density, refs.densityValue, "density");
+    bindSlider(refs.tempo, refs.tempoValue, "tempo");
 
     refs.showVectors.addEventListener("change", function () {
       state.showVectors = refs.showVectors.checked;
-      renderStack();
+      updateStackVisibility();
+    });
+
+    refs.resetScene.addEventListener("click", function () {
+      rebuildSimulation();
+    });
+  }
+
+  function bindSlider(input, output, key) {
+    input.addEventListener("input", function () {
+      state[key] = Number(input.value);
+      output.textContent = String(state[key]);
+      rebuildSimulation();
     });
   }
 
@@ -100,19 +104,16 @@
     acts.forEach(function (act) {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "act-button";
+      button.className = "act-chip";
       button.dataset.actId = act.id;
       button.innerHTML =
-        '<div class="act-button__top"><strong class="act-button__name">' +
+        '<span class="act-chip__name">' +
         act.name +
-        '</strong><span class="act-button__eyebrow">' +
+        '</span><span class="act-chip__note">' +
         act.eyebrow +
-        '</span></div><p class="act-button__statement">' +
-        act.statement +
-        "</p>";
+        "</span>";
       button.addEventListener("click", function () {
         state.activeId = act.id;
-        renderStack();
         rebuildSimulation();
       });
       refs.actList.appendChild(button);
@@ -121,48 +122,9 @@
   }
 
   function syncActButtons() {
-    refs.actList.querySelectorAll(".act-button").forEach(function (button) {
+    refs.actList.querySelectorAll(".act-chip").forEach(function (button) {
       button.classList.toggle("is-active", button.dataset.actId === state.activeId);
     });
-  }
-
-  function renderStack() {
-    refs.stack.innerHTML = "";
-    const act = getAct();
-
-    STACK_LAYERS.forEach(function (layer) {
-      const el = document.createElement("div");
-      el.className = "vector-layer" + (state.showVectors ? "" : " is-hidden");
-      el.style.transform = "translateY(" + layer.y + "px) scale(" + layer.scale + ")";
-      el.style.opacity = String(layer.opacity);
-      el.innerHTML = createAssetSvg(vectorData.assets[layer.key], layer.key, act);
-      refs.stack.appendChild(el);
-    });
-  }
-
-  function createAssetSvg(asset, key, act) {
-    const transform = getFitTransform(asset);
-    const fill = getLayerFill(key, act.palette);
-    const viewBox = "0 0 " + ARTBOARD.width + " " + ARTBOARD.height;
-    const paths = asset.paths
-      .map(function (path) {
-        return '<path d="' + path.d + '" fill="' + fill + '"></path>';
-      })
-      .join("");
-    return (
-      '<svg viewBox="' +
-      viewBox +
-      '" xmlns="http://www.w3.org/2000/svg">' +
-      '<g transform="translate(' +
-      round(transform.x) +
-      " " +
-      round(transform.y) +
-      ") scale(" +
-      round(transform.scale) +
-      ')">' +
-      paths +
-      "</g></svg>"
-    );
   }
 
   function buildMasks() {
@@ -184,9 +146,7 @@
       });
       maskCtx.restore();
 
-      state.masks[key] = {
-        data: maskCtx.getImageData(0, 0, ARTBOARD.width, ARTBOARD.height).data,
-      };
+      state.masks[key] = maskCtx.getImageData(0, 0, ARTBOARD.width, ARTBOARD.height).data;
     });
   }
 
@@ -202,78 +162,117 @@
     const occupancyNorm = state.occupancy / 6;
     const stabilityNorm = state.stability / 100;
     const exchangeNorm = state.exchange / 100;
+    const densityNorm = state.density / 100;
+    const tempoNorm = state.tempo / 100;
     const mesaSeeds = vectorData.mesaCenters.map(copyPoint);
     const plateSeeds = getActivePlateAnchors();
+    const walkerBoost = 0.85 + densityNorm * 2.1;
+    const nodeBoost = 1 + densityNorm * 1.6;
 
     state.sim = {
       act: act,
+      settings: {
+        substeps: 2 + Math.round(tempoNorm * 5),
+        exchangeNorm: exchangeNorm,
+        densityNorm: densityNorm,
+        prefill: 80 + Math.round(densityNorm * 220) + Math.round(tempoNorm * 140) + state.occupancy * 22,
+      },
       activePlates: plateSeeds,
       colonies: [
         createColony({
           key: "base",
           maskKey: "base",
           seeds: mesaSeeds,
-          walkers: 80 + Math.round(exchangeNorm * 40),
-          maxNodes: 120 + Math.round(occupancyNorm * 80),
-          stickDistance: 11,
-          stickChance: 0.04 + stabilityNorm * 0.03,
-          stepSize: 2.4 + exchangeNorm * 0.9,
-          turnRate: 0.7 + exchangeNorm * 0.2,
+          walkers: Math.round((140 + exchangeNorm * 120) * walkerBoost),
+          maxNodes: Math.round((220 + occupancyNorm * 120) * nodeBoost),
+          stickDistance: 11 + stabilityNorm * 1.4,
+          stickChance: 0.11 + stabilityNorm * 0.1,
+          stepSize: 2.2 + exchangeNorm * 1.2 + tempoNorm * 0.4,
+          turnRate: 0.75 + exchangeNorm * 0.4,
           pull: 0.02,
-          bridgeChance: 0.01,
-          nodeSize: 2.4,
+          bridgeChance: 0.02,
+          nodeSize: 2.6,
+          spawnRadius: 28,
+          walkerSize: 1.85,
+          lineAlpha: 0.28,
+          bridgeAlpha: 0.24,
+          walkerAlpha: 0.44,
+          walkerGlowAlpha: 0.22,
         }),
         createColony({
           key: "level1",
           maskKey: "level1",
           seeds: plateSeeds,
-          walkers: 120 + Math.round(occupancyNorm * 50),
-          maxNodes: 340 + Math.round(stabilityNorm * 160),
-          stickDistance: 11 + stabilityNorm * 2,
-          stickChance: 0.1 + stabilityNorm * 0.14,
-          stepSize: 1.9 + exchangeNorm * 0.45,
-          turnRate: 0.54 + exchangeNorm * 0.18,
-          pull: 0.05,
-          bridgeChance: act.id === "redes" ? 0.08 : 0.025,
-          nodeSize: 2.9,
+          walkers: Math.round((240 + occupancyNorm * 140) * walkerBoost),
+          maxNodes: Math.round((520 + stabilityNorm * 260) * nodeBoost),
+          stickDistance: 12 + stabilityNorm * 1.8,
+          stickChance: 0.18 + stabilityNorm * 0.16,
+          stepSize: 2 + exchangeNorm * 0.85 + tempoNorm * 0.45,
+          turnRate: 0.6 + exchangeNorm * 0.28,
+          pull: 0.055,
+          bridgeChance: act.id === "redes" ? 0.12 : 0.035,
+          nodeSize: 3.35,
+          spawnRadius: 20,
+          walkerSize: 1.95,
+          lineAlpha: 0.46,
+          bridgeAlpha: 0.34,
+          walkerAlpha: 0.76,
+          walkerGlowAlpha: 0.28,
         }),
         createColony({
           key: "level2",
           maskKey: "level2",
           seeds: plateSeeds.concat(mesaSeeds),
-          walkers: 90 + Math.round(exchangeNorm * 30),
-          maxNodes: 280 + Math.round((occupancyNorm + stabilityNorm) * 120),
-          stickDistance: 12,
-          stickChance: act.id === "redes" ? 0.16 : 0.08 + stabilityNorm * 0.06,
-          stepSize: 2.1 + exchangeNorm * 0.7,
-          turnRate: 0.82 + exchangeNorm * 0.3,
-          pull: 0.035,
-          bridgeChance: act.id === "redes" || act.id === "poiesis" ? 0.18 : 0.06,
-          nodeSize: 2.5,
+          walkers: Math.round((200 + exchangeNorm * 120) * walkerBoost),
+          maxNodes: Math.round((420 + (occupancyNorm + stabilityNorm) * 240) * nodeBoost),
+          stickDistance: 12 + stabilityNorm * 1.3,
+          stickChance: act.id === "redes" ? 0.28 : 0.16 + stabilityNorm * 0.1,
+          stepSize: 2.1 + exchangeNorm * 1 + tempoNorm * 0.5,
+          turnRate: 0.9 + exchangeNorm * 0.42,
+          pull: 0.04,
+          bridgeChance: act.id === "redes" || act.id === "poiesis" ? 0.22 : 0.08,
+          nodeSize: 2.95,
+          spawnRadius: 24,
+          walkerSize: 1.8,
+          lineAlpha: 0.4,
+          bridgeAlpha: 0.3,
+          walkerAlpha: 0.68,
+          walkerGlowAlpha: 0.24,
         }),
         createColony({
           key: "level3",
           maskKey: "level3",
           seeds: mesaSeeds,
-          walkers: 70 + Math.round(exchangeNorm * 35),
-          maxNodes: 200 + Math.round(stabilityNorm * 120),
-          stickDistance: 10,
+          walkers: Math.round((180 + exchangeNorm * 140) * walkerBoost),
+          maxNodes: Math.round((320 + stabilityNorm * 220) * nodeBoost),
+          stickDistance: 11,
           stickChance:
             act.id === "individuo"
-              ? 0.18
+              ? 0.32
               : act.id === "enxame"
-              ? 0.06
-              : 0.1 + stabilityNorm * 0.04,
-          stepSize: 2 + exchangeNorm * (act.id === "enxame" ? 1.4 : 0.65),
-          turnRate: 0.95 + exchangeNorm * (act.id === "enxame" ? 0.7 : 0.22),
-          pull: act.id === "enxame" ? 0.012 : 0.03,
-          bridgeChance: act.id === "poiesis" ? 0.12 : 0.035,
-          nodeSize: 2.2,
+              ? 0.16
+              : 0.2 + stabilityNorm * 0.08,
+          stepSize: 2.3 + exchangeNorm * (act.id === "enxame" ? 1.8 : 0.9) + tempoNorm * 0.55,
+          turnRate: 1 + exchangeNorm * (act.id === "enxame" ? 0.9 : 0.28),
+          pull: act.id === "enxame" ? 0.014 : 0.03,
+          bridgeChance: act.id === "poiesis" ? 0.16 : 0.045,
+          nodeSize: 2.7,
+          spawnRadius: 26,
+          walkerSize: 1.7,
+          lineAlpha: 0.34,
+          bridgeAlpha: 0.26,
+          walkerAlpha: 0.58,
+          walkerGlowAlpha: 0.22,
         }),
       ],
     };
 
-    updateUi(act, plateSeeds.length);
+    applyTheme(act);
+    renderStack();
+    updateUi();
+    prewarmSimulation(state.sim.settings.prefill);
+    updateStats();
+    renderScene();
   }
 
   function createColony(options) {
@@ -282,7 +281,7 @@
       key: options.key,
       maskKey: options.maskKey,
       seeds: seeds,
-      walkers: seeds.length ? buildWalkers(options.walkers, seeds, options.stepSize) : [],
+      walkers: seeds.length ? buildWalkers(options.walkers, seeds, options.stepSize, options.spawnRadius) : [],
       nodes: seeds.map(function (seed, index) {
         return {
           x: seed.x,
@@ -291,7 +290,7 @@
           bridge: null,
           generation: 0,
           seedIndex: index,
-          size: options.nodeSize * 1.6,
+          size: options.nodeSize * 1.8,
         };
       }),
       maxNodes: options.maxNodes,
@@ -302,26 +301,35 @@
       pull: options.pull,
       bridgeChance: options.bridgeChance,
       nodeSize: options.nodeSize,
+      spawnRadius: options.spawnRadius,
+      walkerSize: options.walkerSize,
+      lineAlpha: options.lineAlpha || 0.3,
+      bridgeAlpha: options.bridgeAlpha || 0.2,
+      walkerAlpha: options.walkerAlpha || 0.4,
+      walkerGlowAlpha: options.walkerGlowAlpha || 0.18,
     };
   }
 
-  function buildWalkers(count, seeds, stepSize) {
+  function buildWalkers(count, seeds, stepSize, spawnRadius) {
     const walkers = [];
-    for (let i = 0; i < count; i += 1) walkers.push(createWalker(seeds, stepSize));
+    for (let i = 0; i < count; i += 1) {
+      walkers.push(createWalker(seeds, stepSize, spawnRadius));
+    }
     return walkers;
   }
 
-  function createWalker(seeds, stepSize) {
-    const seed = seeds[Math.floor(Math.random() * seeds.length)] || { x: ARTBOARD.width / 2, y: ARTBOARD.height / 2 };
+  function createWalker(seeds, stepSize, spawnRadius) {
+    const seedIndex = Math.floor(Math.random() * Math.max(1, seeds.length));
+    const seed = seeds[seedIndex] || { x: ARTBOARD.width * 0.5, y: ARTBOARD.height * 0.5 };
     const angle = Math.random() * Math.PI * 2;
-    const radius = 22 + Math.random() * 58;
+    const radius = 8 + Math.random() * spawnRadius;
     return {
       x: seed.x + Math.cos(angle) * radius,
       y: seed.y + Math.sin(angle) * radius,
       angle: Math.random() * Math.PI * 2,
       wobble: Math.random() * Math.PI * 2,
-      speed: stepSize * (0.8 + Math.random() * 0.4),
-      seedIndex: Math.floor(Math.random() * Math.max(1, seeds.length)),
+      speed: stepSize * (0.82 + Math.random() * 0.5),
+      seedIndex: seedIndex,
     };
   }
 
@@ -338,62 +346,83 @@
     return result;
   }
 
+  function prewarmSimulation(iterations) {
+    for (let i = 0; i < iterations; i += 1) {
+      stepSimulation(1);
+    }
+  }
+
   function frame(ts) {
     if (!state.lastTs) state.lastTs = ts;
-    const dt = Math.min(1.8, (ts - state.lastTs) / 16.6667);
+    const dt = Math.min(1.6, (ts - state.lastTs) / 16.6667);
     state.lastTs = ts;
-    state.phase += dt * 0.016;
+    state.phase += dt * 0.018;
+
     if (state.sim) {
-      stepSimulation(dt);
+      for (let i = 0; i < state.sim.settings.substeps; i += 1) {
+        stepSimulation(dt);
+      }
       renderScene();
     }
+
     window.requestAnimationFrame(frame);
   }
 
   function stepSimulation(dt) {
-    let totalNodes = 0;
+    if (!state.sim) return;
+    const exchangeNorm = state.sim.settings.exchangeNorm;
+
     state.sim.colonies.forEach(function (colony) {
       if (!colony.seeds.length) return;
-      if (colony.nodes.length > colony.maxNodes) colony.nodes.length = colony.maxNodes;
+
+      if (colony.nodes.length > colony.maxNodes) {
+        colony.nodes.splice(colony.seeds.length, colony.nodes.length - colony.maxNodes);
+      }
+
+      if (colony.nodes.length >= colony.maxNodes && Math.random() < 0.02 + exchangeNorm * 0.06) {
+        colony.nodes.splice(colony.seeds.length, Math.min(2, Math.max(0, colony.nodes.length - colony.seeds.length)));
+      }
 
       for (let i = 0; i < colony.walkers.length; i += 1) {
         const walker = colony.walkers[i];
         updateWalker(walker, colony, dt);
+
         if (!pointInMask(colony.maskKey, walker.x, walker.y)) {
-          colony.walkers[i] = createWalker(colony.seeds, colony.stepSize);
+          colony.walkers[i] = createWalker(colony.seeds, colony.stepSize, colony.spawnRadius);
           continue;
         }
 
-        const nearest = findNearest(walker.x, walker.y, colony.nodes, colony.stickDistance, 80);
+        const nearest = findNearest(walker.x, walker.y, colony.nodes, colony.stickDistance, 76);
         if (!nearest) continue;
 
         if (nearest.distanceSq <= colony.stickDistance * colony.stickDistance && Math.random() < colony.stickChance) {
+          const parent = colony.nodes[nearest.index];
           const node = {
             x: walker.x,
             y: walker.y,
             parent: nearest.index,
             bridge: null,
-            generation: colony.nodes[nearest.index].generation + 1,
-            seedIndex: colony.nodes[nearest.index].seedIndex,
-            size: Math.max(0.75, colony.nodeSize * Math.pow(0.992, colony.nodes[nearest.index].generation + 1)),
+            generation: parent.generation + 1,
+            seedIndex: parent.seedIndex,
+            size: Math.max(0.72, colony.nodeSize * Math.pow(0.992, parent.generation + 1)),
           };
-          if (nearest.altIndex !== null && Math.random() < colony.bridgeChance) node.bridge = nearest.altIndex;
+
+          if (nearest.altIndex !== null && Math.random() < colony.bridgeChance) {
+            node.bridge = nearest.altIndex;
+          }
+
           colony.nodes.push(node);
-          colony.walkers[i] = createWalker(colony.seeds, colony.stepSize);
+          colony.walkers[i] = createWalker(colony.seeds, colony.stepSize, colony.spawnRadius);
         }
       }
-
-      totalNodes += colony.nodes.length;
     });
-
-    refs.hudNodes.textContent = String(totalNodes);
   }
 
   function updateWalker(walker, colony, dt) {
     const seed = colony.seeds[walker.seedIndex % colony.seeds.length];
     const toSeed = Math.atan2(seed.y - walker.y, seed.x - walker.x);
     const wander = (Math.random() - 0.5) * colony.turnRate;
-    walker.angle += wander + Math.sin(state.phase + walker.wobble) * 0.06;
+    walker.angle += wander + Math.sin(state.phase + walker.wobble) * 0.08;
     walker.angle = mixAngles(walker.angle, toSeed, colony.pull);
 
     const step = walker.speed * dt;
@@ -406,150 +435,150 @@
       return;
     }
 
-    walker.angle += Math.PI * (0.35 + Math.random() * 0.45);
-    const bx = walker.x + Math.cos(walker.angle) * step * 0.5;
-    const by = walker.y + Math.sin(walker.angle) * step * 0.5;
-    if (pointInMask(colony.maskKey, bx, by)) {
-      walker.x = bx;
-      walker.y = by;
+    walker.angle += Math.PI * (0.28 + Math.random() * 0.6);
+    const bounceX = walker.x + Math.cos(walker.angle) * step * 0.7;
+    const bounceY = walker.y + Math.sin(walker.angle) * step * 0.7;
+    if (pointInMask(colony.maskKey, bounceX, bounceY)) {
+      walker.x = bounceX;
+      walker.y = bounceY;
+      return;
     }
+
+    const seedReset = colony.seeds[walker.seedIndex % colony.seeds.length];
+    walker.x = seedReset.x;
+    walker.y = seedReset.y;
   }
 
   function renderScene() {
     const act = state.sim.act;
-    const palette = act.palette;
     const width = refs.artboard.clientWidth;
     const height = refs.artboard.clientHeight;
 
     ctx.clearRect(0, 0, width, height);
-    paintBackground(width, height, palette);
-    paintMesaHalos(width, height, act);
+    paintField(width, height, act);
 
     state.sim.colonies.forEach(function (colony) {
-      paintColony(colony, act);
+      paintColony(colony, act, width, height);
     });
 
-    paintActivePlates(act);
+    paintActivePlates(act, width, height);
+    updateStats();
   }
 
-  function paintBackground(width, height, palette) {
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, palette.bgStart);
-    gradient.addColorStop(1, palette.bgEnd);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    const glow = ctx.createRadialGradient(width * 0.52, height * 0.42, 40, width * 0.52, height * 0.42, width * 0.5);
-    glow.addColorStop(0, rgba(palette.glow, 0.28));
-    glow.addColorStop(0.4, rgba(palette.secondary, 0.08));
-    glow.addColorStop(1, rgba(palette.bgEnd, 0));
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, width, height);
-  }
-
-  function paintMesaHalos(width, height, act) {
+  function paintField(width, height, act) {
     const palette = act.palette;
     vectorData.mesaCenters.forEach(function (mesa, index) {
       const point = scalePoint(mesa, width, height);
-      const radius = 48 + Math.sin(state.phase * 2 + index) * 6;
-      const halo = ctx.createRadialGradient(point.x, point.y, 10, point.x, point.y, radius);
-      halo.addColorStop(0, rgba(palette.glow, 0.18));
+      const glowRadius = 78 + Math.sin(state.phase * 2 + index * 0.6) * 12;
+      const halo = ctx.createRadialGradient(point.x, point.y, 8, point.x, point.y, glowRadius);
+      halo.addColorStop(0, rgba(palette.glow, 0.16));
+      halo.addColorStop(0.45, rgba(palette.secondary, 0.08));
       halo.addColorStop(1, rgba(palette.secondary, 0));
       ctx.fillStyle = halo;
-      ctx.fillRect(point.x - radius, point.y - radius, radius * 2, radius * 2);
+      ctx.fillRect(point.x - glowRadius, point.y - glowRadius, glowRadius * 2, glowRadius * 2);
     });
   }
 
-  function paintColony(colony, act) {
-    const palette = act.palette;
-    const colors = getColonyColors(colony.key, palette);
-    const width = refs.artboard.clientWidth;
-    const height = refs.artboard.clientHeight;
+  function paintColony(colony, act, width, height) {
+    const colors = getColonyColors(colony.key, act.palette);
+    const sceneScale = width / ARTBOARD.width;
+    const lineWidth = Math.max(0.9, (colony.key === "level2" ? 1.3 : 1.05) * sceneScale);
 
     ctx.save();
-    ctx.lineWidth = colony.key === "level2" ? 1.2 : 1;
+    ctx.lineWidth = lineWidth;
+
     for (let i = colony.seeds.length; i < colony.nodes.length; i += 1) {
       const node = colony.nodes[i];
       if (node.parent === null) continue;
-      const p = scalePoint(node, width, height);
+      const point = scalePoint(node, width, height);
       const parent = scalePoint(colony.nodes[node.parent], width, height);
-      ctx.strokeStyle = rgba(mixColor(colors.lineA, colors.lineB, clamp(node.generation / 20, 0, 1)), 0.24);
+      const tone = clamp(node.generation / 24, 0, 1);
+      ctx.strokeStyle = rgba(mixColor(colors.lineA, colors.lineB, tone), colony.lineAlpha);
       ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
+      ctx.moveTo(point.x, point.y);
       ctx.lineTo(parent.x, parent.y);
       ctx.stroke();
 
       if (node.bridge !== null) {
         const bridge = scalePoint(colony.nodes[node.bridge], width, height);
-        ctx.strokeStyle = rgba(colors.bridge, 0.18);
+        ctx.strokeStyle = rgba(colors.bridge, colony.bridgeAlpha);
         ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
+        ctx.moveTo(point.x, point.y);
         ctx.lineTo(bridge.x, bridge.y);
         ctx.stroke();
       }
     }
 
-    colony.nodes.forEach(function (node) {
-      drawNode(scalePoint(node, width, height), node.size * (width / ARTBOARD.width), colors, act.effect);
+    colony.walkers.forEach(function (walker) {
+      const point = scalePoint(walker, width, height);
+      const walkerRadius = Math.max(1.4, colony.walkerSize * sceneScale);
+      ctx.fillStyle = rgba(colors.walkerGlow, colony.walkerGlowAlpha);
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, walkerRadius * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = rgba(colors.walker, act.id === "enxame" ? colony.walkerAlpha + 0.08 : colony.walkerAlpha);
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, walkerRadius, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    if (colony.key !== "level1") {
-      ctx.fillStyle = rgba(colors.bridge, act.id === "enxame" ? 0.24 : 0.16);
-      colony.walkers.forEach(function (walker) {
-        const point = scalePoint(walker, width, height);
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 1.2, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
+    colony.nodes.forEach(function (node) {
+      const point = scalePoint(node, width, height);
+      const size = node.size * (width / ARTBOARD.width);
+      drawNode(point, size, colors, act.effect);
+    });
+
     ctx.restore();
   }
 
   function drawNode(point, size, colors, effect) {
     if (effect === "rgb-delay") {
-      [[-2.1, 0.8, "#ff4b83"], [1.8, -0.5, "#4ee2ff"], [0.6, 1.4, "#7b6cff"]].forEach(function (entry) {
-        ctx.fillStyle = rgba(entry[2], 0.16);
+      [[-2.4, 0.7, "#ff4ca8"], [2.2, -0.8, "#4ce8ff"], [0.7, 1.6, "#7f67ff"]].forEach(function (ghost) {
+        ctx.fillStyle = rgba(ghost[2], 0.24);
         ctx.beginPath();
-        ctx.arc(point.x + entry[0], point.y + entry[1], size * 1.55, 0, Math.PI * 2);
+        ctx.arc(point.x + ghost[0], point.y + ghost[1], size * 1.8, 0, Math.PI * 2);
         ctx.fill();
       });
     }
 
-    ctx.fillStyle = rgba(colors.glow, 0.24);
+    ctx.fillStyle = rgba(colors.glow, 0.34);
     ctx.beginPath();
-    ctx.arc(point.x, point.y, size * 1.7, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, size * 2.1, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = colors.core;
     ctx.beginPath();
     ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.strokeStyle = rgba(colors.edge, 0.72);
+    ctx.lineWidth = Math.max(0.8, size * 0.22);
+    ctx.stroke();
   }
 
-  function paintActivePlates(act) {
-    const width = refs.artboard.clientWidth;
-    const height = refs.artboard.clientHeight;
+  function paintActivePlates(act, width, height) {
     ctx.save();
     state.sim.activePlates.forEach(function (plate, index) {
       const point = scalePoint(plate, width, height);
       const pulse = 1 + Math.sin(state.phase * 4 + index) * 0.18;
-      ctx.strokeStyle = rgba(act.palette.plate, 0.5);
+      ctx.strokeStyle = rgba(act.palette.plate, 0.42);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(point.x, point.y, 7.5 * pulse, 0, Math.PI * 2);
+      ctx.arc(point.x, point.y, 8.5 * pulse, 0, Math.PI * 2);
       ctx.stroke();
     });
     ctx.restore();
   }
 
-  function updateUi(act, activePlateCount) {
+  function updateUi() {
+    const act = state.sim.act;
     syncActButtons();
-    refs.application.textContent = act.application;
+    refs.hudRegime.textContent = act.eyebrow;
     refs.hudName.textContent = act.name;
     refs.hudStatement.textContent = act.statement;
-    refs.hudMesas.textContent = state.occupancy > 0 ? String(vectorData.mesaCenters.length) : "0";
-    refs.hudPratos.textContent = String(activePlateCount);
-    refs.hudRegime.textContent = act.eyebrow;
+    refs.application.textContent = act.application;
+
     refs.palette.innerHTML = "";
     [
       ["bg", act.palette.bgStart],
@@ -558,16 +587,87 @@
       ["alt", act.palette.tertiary],
       ["glow", act.palette.glow],
     ].forEach(function (entry) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "swatch";
-      wrapper.innerHTML =
+      const swatch = document.createElement("div");
+      swatch.className = "swatch";
+      swatch.innerHTML =
         '<div class="swatch__chip" style="background:' +
         entry[1] +
         '"></div><span class="swatch__label">' +
         entry[0] +
         "</span>";
-      refs.palette.appendChild(wrapper);
+      refs.palette.appendChild(swatch);
     });
+  }
+
+  function updateStats() {
+    refs.hudMesas.textContent = state.occupancy > 0 ? String(vectorData.mesaCenters.length) : "0";
+    refs.hudPratos.textContent = String(state.sim.activePlates.length);
+    refs.hudWalkers.textContent = String(getTotalWalkers());
+    refs.hudNodes.textContent = String(getTotalNodes());
+  }
+
+  function renderStack() {
+    refs.stackUnder.innerHTML = "";
+    refs.stackOver.innerHTML = "";
+    const act = getAct();
+
+    STACK_LAYERS.forEach(function (layer) {
+      const el = document.createElement("div");
+      el.className = "vector-layer";
+      el.style.transform = "translateY(" + layer.y + "px) scale(" + layer.scale + ")";
+      el.style.opacity = String(layer.opacity);
+      el.innerHTML = createAssetSvg(vectorData.assets[layer.key], layer.key, act);
+      if (layer.target === "over") {
+        refs.stackOver.appendChild(el);
+      } else {
+        refs.stackUnder.appendChild(el);
+      }
+    });
+
+    updateStackVisibility();
+  }
+
+  function updateStackVisibility() {
+    [refs.stackUnder, refs.stackOver].forEach(function (stack) {
+      stack.querySelectorAll(".vector-layer").forEach(function (layer) {
+        layer.classList.toggle("is-hidden", !state.showVectors);
+      });
+    });
+  }
+
+  function createAssetSvg(asset, key, act) {
+    const transform = getFitTransform(asset);
+    const fill = getLayerFill(key, act.palette);
+    const paths = asset.paths
+      .map(function (path) {
+        return '<path d="' + path.d + '" fill="' + fill + '"></path>';
+      })
+      .join("");
+
+    return (
+      '<svg viewBox="0 0 ' +
+      ARTBOARD.width +
+      " " +
+      ARTBOARD.height +
+      '" xmlns="http://www.w3.org/2000/svg"><g transform="translate(' +
+      round(transform.x) +
+      " " +
+      round(transform.y) +
+      ") scale(" +
+      round(transform.scale) +
+      ')">' +
+      paths +
+      "</g></svg>"
+    );
+  }
+
+  function applyTheme(act) {
+    document.documentElement.style.setProperty("--shell-bg-a", act.palette.bgStart);
+    document.documentElement.style.setProperty("--shell-bg-b", act.palette.bgEnd);
+    document.documentElement.style.setProperty("--accent", act.palette.secondary);
+    document.documentElement.style.setProperty("--artboard-glow-a", rgba(act.palette.glow, 0.54));
+    document.documentElement.style.setProperty("--artboard-glow-b", rgba(act.palette.secondary, 0.18));
+    document.documentElement.style.setProperty("--artboard-glow-c", rgba(act.palette.tertiary, 0.16));
   }
 
   function getAct() {
@@ -587,10 +687,57 @@
   }
 
   function getColonyColors(key, palette) {
-    if (key === "base") return { core: palette.tertiary, glow: palette.glow, lineA: palette.line, lineB: palette.tertiary, bridge: palette.secondary };
-    if (key === "level1") return { core: palette.primary, glow: palette.glow, lineA: palette.primary, lineB: palette.secondary, bridge: palette.spark };
-    if (key === "level2") return { core: palette.secondary, glow: palette.glow, lineA: palette.secondary, lineB: palette.tertiary, bridge: palette.spark };
-    return { core: palette.tertiary, glow: palette.glow, lineA: palette.tertiary, lineB: palette.primary, bridge: palette.secondary };
+    const whitePrimary = String(palette.primary).toLowerCase() === "#ffffff";
+
+    if (key === "base") {
+      return {
+        core: mixColor(palette.tertiary, palette.primary, 0.45),
+        glow: palette.glow,
+        lineA: mixColor(palette.line, palette.spark, 0.2),
+        lineB: palette.tertiary,
+        bridge: palette.secondary,
+        edge: palette.spark,
+        walker: palette.spark,
+        walkerGlow: palette.glow,
+      };
+    }
+
+    if (key === "level1") {
+      return {
+        core: whitePrimary ? mixColor(palette.primary, palette.secondary, 0.34) : palette.primary,
+        glow: palette.glow,
+        lineA: whitePrimary ? mixColor(palette.primary, palette.secondary, 0.2) : palette.primary,
+        lineB: whitePrimary ? palette.spark : palette.secondary,
+        bridge: palette.spark,
+        edge: palette.spark,
+        walker: palette.secondary,
+        walkerGlow: palette.glow,
+      };
+    }
+
+    if (key === "level2") {
+      return {
+        core: palette.secondary,
+        glow: palette.glow,
+        lineA: palette.secondary,
+        lineB: palette.tertiary,
+        bridge: palette.spark,
+        edge: palette.primary,
+        walker: palette.secondary,
+        walkerGlow: palette.glow,
+      };
+    }
+
+    return {
+      core: mixColor(palette.tertiary, palette.primary, 0.24),
+      glow: palette.glow,
+      lineA: palette.tertiary,
+      lineB: palette.primary,
+      bridge: palette.secondary,
+      edge: palette.spark,
+      walker: whitePrimary ? palette.spark : palette.primary,
+      walkerGlow: palette.glow,
+    };
   }
 
   function getFitTransform(asset) {
@@ -609,19 +756,20 @@
     const xi = Math.floor(x);
     const yi = Math.floor(y);
     if (!mask || xi < 0 || yi < 0 || xi >= ARTBOARD.width || yi >= ARTBOARD.height) return false;
-    return mask.data[(yi * ARTBOARD.width + xi) * 4 + 3] > 10;
+    return mask[(yi * ARTBOARD.width + xi) * 4 + 3] > 10;
   }
 
-  function findNearest(x, y, nodes, stickDistance, altDistance) {
+  function findNearest(x, y, nodes, stickDistance, maxAxis) {
     let bestIndex = null;
     let bestDistanceSq = Infinity;
     let altIndex = null;
-    let altDistanceSq = altDistance * altDistance;
+    let altDistanceSq = maxAxis * maxAxis;
 
     for (let i = nodes.length - 1; i >= 0; i -= 1) {
       const dx = x - nodes[i].x;
       const dy = y - nodes[i].y;
-      if (Math.abs(dx) > altDistance || Math.abs(dy) > altDistance) continue;
+      if (Math.abs(dx) > maxAxis || Math.abs(dy) > maxAxis) continue;
+
       const distanceSq = dx * dx + dy * dy;
       if (distanceSq < bestDistanceSq) {
         altIndex = bestIndex;
@@ -632,11 +780,24 @@
         altIndex = i;
         altDistanceSq = distanceSq;
       }
+
       if (bestDistanceSq <= stickDistance * stickDistance * 0.35) break;
     }
 
     if (bestIndex === null) return null;
     return { index: bestIndex, distanceSq: bestDistanceSq, altIndex: altIndex };
+  }
+
+  function getTotalWalkers() {
+    return state.sim.colonies.reduce(function (sum, colony) {
+      return sum + colony.walkers.length;
+    }, 0);
+  }
+
+  function getTotalNodes() {
+    return state.sim.colonies.reduce(function (sum, colony) {
+      return sum + colony.nodes.length;
+    }, 0);
   }
 
   function scalePoint(point, width, height) {
@@ -659,6 +820,7 @@
         b: Number(values[2] || 0),
       };
     }
+
     const hex = color.replace("#", "");
     return {
       r: parseInt(hex.slice(0, 2), 16),
@@ -691,12 +853,12 @@
     return a + delta * clamp(t, 0, 1);
   }
 
-  function lerp(a, b, t) {
-    return a + (b - a) * t;
-  }
-
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
+  }
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
   }
 
   function round(value) {
